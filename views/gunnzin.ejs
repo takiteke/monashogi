@@ -1,0 +1,451 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="x-ua-compatible" content="IE=edge">
+<title>軍人将棋</title>
+<link rel="stylesheet" href="aiueo.css" type="text/css">
+</head>
+<body>
+	<img src="gunzinimage/back2.png" id="banmen" draggable="false">
+	<div class="bord">
+		<img src="gunzinimage/enemy.png" id="11" onmousedown="unko(11)" onclick="syori()">
+		<img src="gunzinimage/enemy.png" id="12" onmousedown="unko(12)">
+		<img src="gunzinimage/inv2.png" id="13">
+		<img src="gunzinimage/enemy.png" id="14" onmousedown="unko(14)">
+		<img src="gunzinimage/inv2.png" id="15">
+		<img src="gunzinimage/enemy.png" id="16" onmousedown="unko(16)">
+		<img src="gunzinimage/enemy.png" id="17" onmousedown="unko(17)"><br>
+		<img src="gunzinimage/enemy.png" id="21" onmousedown="unko(21)">
+		<img src="gunzinimage/enemy.png" id="22" onmousedown="unko(22)">
+	</div>
+	<div class="mozi">
+		開始:<div id="first">無し</div>終了:<div id="end">無し</div>
+	</div>
+</body>
+
+
+<script>
+	var image = 	  ['gunzinimage/inv.png','gunzinimage/mymine.png','gunzinimage/myspy.png','gunzinimage/mykouhei.png','gunzinimage/mykihei.png','gunzinimage/mysyoi.png','gunzinimage/mytyui.png','gunzinimage/mytaii.png','gunzinimage/mysyosa.png','gunzinimage/mytyusa.png','gunzinimage/mytaisa.png','gunzinimage/mytank.png','gunzinimage/myfly.png','gunzinimage/mysyosyo.png','gunzinimage/mytyusyo.png','gunzinimage/mytaisyo.png','gunzinimage/mygunki.png','gunzinimage/inv2.png','gunzinimage/enemy.png','gunzinimage/inv.png'];
+	var enemy_image = ['gunzinimage/inv.png','gunzinimage/enemy_mine.png','gunzinimage/enemy_spy.png','gunzinimage/enemy_kouhei.png','gunzinimage/enemy_kihei.png','gunzinimage/enemy_syoi.png','gunzinimage/enemy_tyui.png','gunzinimage/enemy_taii.png','gunzinimage/enemy_syosa.png','gunzinimage/enemy_tyusa.png','gunzinimage/enemy_taisa.png','gunzinimage/enemy_tank.png','gunzinimage/enemy_fly.png','gunzinimage/enemy_syosyo.png','gunzinimage/enemy_tyusyo.png','gunzinimage/enemy_taisyo.png','gunzinimage/enemy_gunki.png','gunzinimage/inv2.png','gunzinimage/enemy.png','gunzinimage/inv.png'];
+
+
+	var a = new Object();
+	a.id = 0;
+	a.name="空白";
+	a.ue=0;
+	a.sita=0;
+	a.migi=0;
+	a.hidari=0;
+	a.kateru=[0];
+
+	var b = new Object();
+	b.id = 1;
+	b.name = "地雷";
+	b.ue = 0;
+	b.sita = 0;
+	b.migi =0;
+	b.hidari = 0;
+	b.kateru = [0];
+
+	var c = new Object();
+	c.id = 2;
+	c.name = "スパイ";
+	c.ue = 1;
+	c.sita = 1;
+	c.migi = 1;
+	c.hidari = 1;
+	c.kateru = [15,0];
+
+var myban = [
+		[s,s,r,s,r,s,s],
+		[s,s,s,s,s,s],
+		[s,s,s,s,s,s],
+		[s,s,s,s,s,s],
+		[t,a,t,t,a,t],
+		[c,o,i,d,l,d],
+		[k,m,p,j,q,f],
+		[h,l,h,n,m,f],
+		[g,g,r,b,r,b,e],
+		];
+var cpuban = [
+		[f,p,r,j,r,e,m],
+		[g,q,l,d,e,i],
+		[l,d,f,c,b,g],
+		[h,n,h,b,k,o],
+		[t,a,t,t,a,t],
+		[s,s,s,s,s,s],
+		[s,s,s,s,s,s],
+		[s,s,s,s,s,s],
+		[s,s,r,s,r,s,s],
+		];
+
+
+function syori(){
+	for(var io=0;io<4;io++){
+		for(var ab=0;ab<6;ab++){
+			var zahyo=(io+1)*10+(ab+1);
+			console.log(zahyo);
+			console.log(cpuban[io][ab]);
+			document.getElementById(zahyo).src=enemy_image[cpuban[io][ab].id];
+		}
+	}
+	document.getElementById(17).src=enemy_image[cpuban[0][6].id];
+};
+
+function unko(num){
+	var sum = document.getElementById(""+num);
+	//X8~600 Y8~657 98px感覚？
+	var dainyu;//つかんだ駒（味方）
+	var dainyu2;//離した場所の駒（味方）
+	var dainyu3;//離した場所の駒（敵）
+	var firstX;
+	var firstY;
+	var endX;
+	var endY;
+	var firstFlag=0;
+	var endFlag=0;
+	var kawatta=0;
+	sum.ondragstart = function(first){
+		if((first.pageY>8 && first.pageY<74)||(first.pageY>584 && first.pageY<657)){
+				if(first.pageX>205 && first.pageX<404){
+					//総本部
+					dainyu=myban[Math.floor((first.pageY-8)/73)][3];
+					firstX = 3;
+				}else if(first.pageX>8 && first.pageX<205){
+					//総本部左 1,2
+					dainyu=myban[Math.floor((first.pageY-8)/73)][Math.floor((first.pageX-8)/99)];
+					firstX = Math.floor((first.pageX-8)/99);
+				}else{
+					//総本部右 6,7
+					dainyu=myban[Math.floor((first.pageY-8)/73)][Math.floor((first.pageX-8)/99)+1];
+					firstX = Math.floor((first.pageX-8)/99);
+					firstFlag=1;
+					}
+			}else{
+				dainyu=myban[Math.floor((first.pageY-8)/73)][Math.floor((first.pageX-8)/99)];
+				firstX = Math.floor((first.pageX-8)/99);
+			}
+			document.getElementById("first").textContent=dainyu.name;
+			console.log("[掴んだ]"+dainyu.name);
+			firstY = Math.floor((first.pageY-8)/73);
+		
+	}
+	sum.ondragend =  function(end){
+		endY = Math.floor((end.pageY-8)/73);
+		//1列目か9列目の処理
+		if((end.pageY>8 && end.pageY<74)||(end.pageY>584 && end.pageY<653)){
+			if(end.pageX>205 && end.pageX<404){
+				dainyu2=myban[endY][3];
+				dainyu3=cpuban[endY][3];
+				endX=3;
+			}else if(end.pageX>8 && end.pageX<205){
+				dainyu2=myban[endY][Math.floor((end.pageX-8)/99)];
+				dainyu3=cpuban[endY][Math.floor((end.pageX-8)/99)];
+				endX=Math.floor((end.pageX-8)/99);
+			}else{
+				dainyu2=myban[endY][Math.floor((end.pageX-8)/99)+1];
+				dainyu3=cpuban[endY][Math.floor((end.pageX-8)/99)+1];
+				endX=Math.floor((end.pageX-8)/99);
+				endFlag=1;
+			}
+		}else{
+			dainyu2=myban[endY][Math.floor((end.pageX-8)/99)];//置いた場所の駒
+			dainyu3=cpuban[endY][Math.floor((end.pageX-8)/99)];
+			endX=Math.floor((end.pageX-8)/99);
+		}
+		document.getElementById("end").textContent=dainyu2.name;
+		console.log("[離した]"+dainyu2.name);
+
+		var count = 0;
+			//その駒が1マス以上動けるなら
+			if(dainyu.ue > 0){
+				console.log("動かせる駒");
+				if(dainyu2.id == 0||dainyu2.id == 18){
+					//置ける場所か
+					console.log("置けるマス");
+					if(firstY == endY){
+						var ookiihou = 0;
+						if(firstX>endX){
+							ookiihou = firstX;
+						}else{
+							ookiihou = endX;
+						}
+						for(var kari = Math.abs(firstX-endX);kari!=1;kari--){
+							if(myban[firstY][ookiihou-(kari-1)].id == 17){
+								count++;
+								console.log("カウント");
+							}
+						}
+					}
+					if((dainyu.ue >= Math.abs(firstY-endY)) && dainyu.hidari >= Math.abs(firstX-endX)-count){
+						//動かせる距離を越えていないか
+						console.log("移動可能範囲内です");
+						var koeta = 0;
+						//飛行機以外
+						if(dainyu.id != 12){
+							//Yが動いているなら
+							if(Math.abs(firstX-endX) < Math.abs(firstY-endY)){
+								//上方向に動いている
+								if(firstY-endY>0){
+									for(var nokori=Math.abs(firstY-endY);1!=nokori;nokori--){
+										if(firstX == 3 && firstY == 8){
+											if(myban[Math.abs(firstY-(nokori-1))][endX].id==0||myban[Math.abs(firstY-(nokori-1))][endX].id==17){
+												//途中で駒を飛び越している場合にフラグを建てる
+											}else{
+												koeta = 1;
+												console.log("a");
+											}
+										}else{
+											if(myban[Math.abs(firstY-(nokori-1))][firstX].id==0||myban[Math.abs(firstY-(nokori-1))][firstX].id==17){
+												
+											}else{
+												koeta = 1;
+												console.log("a");
+											}
+										}
+									}
+								}else{
+									//下方向に動いている
+									if(firstX == 3 && firstY == 0){
+										for(var nokori=Math.abs(firstY-endY);1!=nokori;nokori--){
+											if(myban[Math.abs(endY-(nokori-1))][endX].id==0||myban[Math.abs(endY-(nokori-1))][endX].id==17){
+												//途中で駒を飛び越している場合にフラグを建てる
+											}else{
+												koeta = 1;
+												console.log("b");
+											}
+										}
+									}else{
+										for(var nokori=Math.abs(firstY-endY);1!=nokori;nokori--){
+											if(myban[Math.abs(endY-(nokori-1))][firstX].id==0||myban[Math.abs(endY-(nokori-1))][firstX].id==17){
+												//途中で駒を飛び越している場合にフラグを建てる
+											}else{
+												koeta = 1;
+												console.log("b");
+											}
+										}
+									}
+								}
+							
+								//上方向に動いている
+								if(firstY-endY>0){
+									for(var nokori=Math.abs(firstY-endY);1!=nokori;nokori--){
+										if(myban[Math.abs(firstY-(nokori-1))][firstX].id==0||myban[Math.abs(firstY-(nokori-1))][endX].id==17){
+											//途中で駒を飛び越している場合にフラグを建てる
+										}else{
+											koeta = 1;
+											console.log("a");
+										}
+									}
+								}else{
+									//下方向に動いている
+									for(var nokori=Math.abs(firstY-endY);1!=nokori;nokori--){
+										if(myban[Math.abs(endY-(nokori-1))][endX].id==0||myban[Math.abs(endY-(nokori-1))][endX].id==17){
+											//途中で駒を飛び越している場合にフラグを建てる
+										}else{
+											koeta = 1;
+											console.log("b");
+										}
+									}
+								}
+								
+							}else{
+								//x,もしくは両方が動いているなら
+								if(firstX-endX>0){
+									//左に動いている
+									for(var nokori=Math.abs(firstX-endX);1!=nokori;nokori--){
+										if(myban[Math.abs(firstY)][firstX-(nokori-1)].id==0||myban[Math.abs(firstY)][firstX-(nokori-1)].id==17){
+											//途中で駒を飛び越している場合にフラグを建てる
+										}else{
+											koeta = 1;
+											console.log("c");
+										}
+									}
+								}else{
+									//右に動いてる
+									for(var nokori=Math.abs(endX-firstX);1!=nokori;nokori--){
+										if(myban[Math.abs(firstY)][endX-(nokori-1)].id==0||myban[Math.abs(firstY)][endX-(nokori-1)].id==17){
+											//途中で駒を飛び越している場合にフラグを建てる
+										}else{
+											koeta = 1;
+											console.log("d");
+										}
+									}
+								}
+							}
+						}
+						
+						if(koeta == 0){
+							if((endX == 3 && endY == 0)||(endX == 3 && endY == 8)){
+							//敵又は味方の総本部に入ったときの挙動処理(X,Y両方動くマスがあるため)
+							console.log("本部入り");
+								if(firstX == 2 && endX == 3){
+									//処理
+									console.log("XY両方動くマスです");
+									var result=0;
+								for(var nagasa = dainyu.kateru.length;nagasa>0;nagasa--){
+									if(dainyu3.id == dainyu.kateru[nagasa-1]){
+										result=1;
+										console.log("倒せる");
+										break;
+									}
+								}
+								if(result==1){
+									myban[endY][endX]=dainyu;
+									myban[firstY][firstX]=a;
+									cpuban[endY][endX]=s;
+									cpuban[firstY][firstX]=a;
+								}else{
+									for(var nagasa = dainyu3.kateru.length;nagasa>0;nagasa--){
+										if(dainyu.id == dainyu3.kateru[nagasa-1]){
+											result=1;
+											console.log("負ける");
+											break;
+										}
+									}
+									if(result == 1){
+										myban[endY][endX]=s;
+										myban[firstY][firstX]=a;
+										cpuban[endY][endX]=dainyu3;
+										cpuban[firstY][firstX]=a;
+									}
+								}
+								//地雷又は同じ駒通しの相打ち
+								if(result == 0){
+									console.log("おあいこ");
+									myban[endY][endX]=a;
+									myban[firstY][firstX]=a;
+									cpuban[endY][endX]=a;
+									cpuban[firstY][firstX]=a;
+								}
+								var firstID = (firstY+1)*10+firstX+1;
+								var endID = (endY+1)*10+endX+1;
+								document.getElementById(firstID).src=image[myban[firstY][firstX].id];
+								document.getElementById(endID).src  =image[myban[endY][endX].id];
+								console.log("画像切り替え処理");
+								kawatta=1;
+								}
+							}
+							if((firstX == endX && firstY != endY)||(firstY == endY && firstX != endX)){
+								//xかｙどちらかのみが動いているか（両方動いてはいけない）
+								console.log("通常処理です");
+								//Xが１か９に入ったorから出た場合の修正
+								if(firstFlag==1){
+									firstX++;
+								}
+								if(endFlag==1){
+									endX++;
+								}
+								console.log("firstX:"+firstX);
+								console.log("firstY:"+firstY);
+								console.log("endX:"+endX);
+								console.log("endY:"+endY);
+								var result=0;
+								for(var nagasa = dainyu.kateru.length;nagasa>0;nagasa--){
+								if(dainyu3.id == dainyu.kateru[nagasa-1]){
+										result=1;
+										console.log("倒せる");
+										break;
+									}
+								}
+								if(result==1){
+									myban[endY][endX]=dainyu;
+									myban[firstY][firstX]=a;
+									cpuban[endY][endX]=s;
+									cpuban[firstY][firstX]=a;
+								}else{
+									for(var nagasa = dainyu3.kateru.length;nagasa>0;nagasa--){
+										if(dainyu.id == dainyu3.kateru[nagasa-1]){
+											result=1;
+											console.log("負ける");
+											break;
+										}
+									}
+									if(result == 1){
+										myban[endY][endX]=s;
+										myban[firstY][firstX]=a;
+										cpuban[endY][endX]=dainyu3;
+										cpuban[firstY][firstX]=a;
+									}
+								}
+								//地雷又は同じ駒通しの相打ち
+								if(result == 0){
+									console.log("おあいこ");
+									myban[endY][endX]=a;
+									myban[firstY][firstX]=a;
+									cpuban[endY][endX]=a;
+									cpuban[firstY][firstX]=a;
+								}
+								var firstID = (firstY+1)*10+firstX+1;
+								var endID = (endY+1)*10+endX+1;
+								document.getElementById(firstID).src=image[myban[firstY][firstX].id];
+								document.getElementById(endID).src  =image[myban[endY][endX].id];
+								console.log("画像切り替え処理");
+								kawatta=1;
+							}else if((firstX == 3 && endX == 2)&&(firstY == 0 ||firstY == 8)&&(Math.abs(firstY-endY) > 0)){
+								//総本部x3から座標Xが２に移動した場合(X,Y両方動くため)
+								console.log("本部からXY両方動くマスです");
+								var result=0;
+								for(var nagasa = dainyu.kateru.length;nagasa>0;nagasa--){
+									if(dainyu3.id == dainyu.kateru[nagasa-1]){
+										result=1;
+										console.log("倒せる");
+										break;
+									}
+								}
+								if(result==1){
+									myban[endY][endX]=dainyu;
+									myban[firstY][firstX]=a;
+									cpuban[endY][endX]=s;
+									cpuban[firstY][firstX]=a;
+								}else{
+									for(var nagasa = dainyu3.kateru.length;nagasa>0;nagasa--){
+										if(dainyu.id == dainyu3.kateru[nagasa-1]){
+											result=1;
+											console.log("負ける");
+											break;
+										}
+									}
+									if(result == 1){
+										myban[endY][endX]=s;
+										myban[firstY][firstX]=a;
+										cpuban[endY][endX]=dainyu3;
+										cpuban[firstY][firstX]=a;
+									}
+								}
+								//地雷又は同じ駒通しの相打ち
+								if(result == 0){
+									myban[endY][endX]=a;
+									myban[firstY][firstX]=a;
+									cpuban[endY][endX]=a;
+									cpuban[firstY][firstX]=a;
+								}
+								var firstID = (firstY+1)*10+firstX+1;
+								var endID = (endY+1)*10+endX+1;
+								document.getElementById(firstID).src=image[myban[firstY][firstX].id];
+								document.getElementById(endID).src  =image[myban[endY][endX].id];
+								console.log("画像切り替え処理");
+								kawatta=1;
+							}else{
+								//XY両方の座標が移動した場合
+								console.log("X,Y座標を同時に動かすことはできません");
+							}
+						}else{
+							console.log("飛行機以外は駒を飛び越すことはできません");
+						}
+					}else{
+						console.log("移動可能距離を越えています");
+					}
+				}else{
+					console.log("置けない場所です");
+				}
+			}else{
+				console.log("動かせない駒です");
+			}
+	}
+}
+</script>
+</html>
+

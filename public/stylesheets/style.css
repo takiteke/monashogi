@@ -1,0 +1,52 @@
+body {
+  position: relative;
+  padding: 50px;
+  width: 600px;
+  height: 1000px;
+}
+
+.main {
+  display: block;
+  width: 540px;
+}
+
+p {
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  margin: 0px 20px;
+}
+
+.linkbar {
+  z-index: 200;
+  position: fixed;
+  width: 1900px;
+  height: 50px;
+  left: 0px;
+  top: 0px;
+  background: #000;
+}
+
+a {
+  font: 30px "Lucida Grande", Helvetica, Arial, sans-serif;
+  margin: 0px 20px;
+  color: rgb(255, 248, 181);
+}
+
+.board {
+  z-index: 10;
+  position: relative;
+  width: 400px;
+  height: 560px;
+}
+
+.piece_stand {
+  z-index: 5;
+  display: block;
+  position: relative;
+  width: 540px;
+  height: 80px;
+  background: #f6c674;
+}
+
+.error {
+  color: red;
+}

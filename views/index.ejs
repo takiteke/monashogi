@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script type="text/javascript" src="/javascripts/google_analytics.js"></script>
+    
+    <script src="/javascripts/jquery.min.js"></script>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script>
+      $(document).ready(function(){
+        $('#btn').click(function(){
+          $.getJSON("/ajax?num="+nowtesuu, function(json){
+            //var msg = '';
+            json.forEach(function(value) {
+              if(value != null){
+                sashite[tesuu++] = value;
+                msg += '<p>(' + value.from.dan + ', ' + value.from.suji + ') → (' + value.to.dan + ', ' + value.to.suji + '), cap:' + value.capture + ', pro:' + value.promote + '</p>';
+              }
+            });
+            //play();
+            nowtesuu = tesuu;
+            $('#msg').html(msg);
+          });
+        });
+        $('#next').click(function(){
+          if(playing < tesuu){
+            realize((playing%2), sashite[playing]);
+            playing++;
+          }
+        });
+        $('#back').click(function(){
+          if(playing > 0){
+            playing--;
+            back_realize((playing%2), sashite[playing]);
+          }
+        });
+      });
+      
+    </script>
+  </head>
+
+  <body>
+    <div class="linkbar">
+      <a href="/">home</a>
+    </div>
+
+    <div class="main">
+      <p>評価値: <%= Eval %></p>
+    </div>
+
+    <div class="piece_stand"></div>
+
+    <div class="board">
+      <img src="/images/board.jpg" alt="aa" style="position: absolute; width: 540px; height: 540px; left: 0px; top: 10px;">
+      <% for(var y=1; y<=7; y++){ %><% for(var x=1; x<=7; x++){ %>
+          <% var cmd = '<img src="/images/piece' + Board[y-1][x-1] + '.png" alt="aa" style="position: absolute; width: 70px; height: 70px; left: ' + ((x-1)*70+25) + 'px; top: ' + ((y-1)*70+35) + 'px;"' + ' id=' + (y*10+x) + ' onmousedown="mdevent(' + (y*10+x) + ')">'; %>
+          <%- cmd %>
+      <% } %><% } %>
+      <% for(var y=0; y<=1; y++){ %><% var pos = 0; %><% for(var x=1; x<=7; x++){ %>
+          <% var cmd = '<img src="/images/piece' + (Hand[y][x]?(x+y*16):0) + '.png" alt="aa" style="position: absolute; width: 70px; height: 70px; left: ' + (x-1)*70 + 'px; top: ' + (y?-80:570) + 'px;"' + 'id=' + ((y?0:100)+x) + ' onmousedown="mdevent(' + ((y?0:100)+x) + ')">'; %>
+          <%- cmd %>
+      <% } %><% } %>
+    </div>
+
+    <div class="piece_stand"></div>
+
+    <form method="post" action="/">
+      <input type="hidden" name="Board" value=<%= Board %>>
+      <input type="hidden" name="Hand" value=<%= Hand %>>
+      <input type="hidden" name="turn" value=<%= turn %>>
+      <p>
+        <input type="submit" value="次へ">
+      </p>
+    </form>
+
+    <input type="button" id="btn" value="gettt!!!">
+    <input type="button" id="back" value="←back←">
+    <input type="button" id="next" value="→next→">
+    <p id="msg"></p>
+    
+
+  </body>
+
+<script type="text/javascript" src="/javascripts/shogi_engine.js"></script>
+</html>

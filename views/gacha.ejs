@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script type="text/javascript" src="/javascripts/google_analytics.js"></script>
+
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <head>
+      <h1><%= title %></h1>
+    </head>
+    <div role="main">
+        <h2>Welcome to <%= title %>.</h2>
+        <p>
+            <img src="/images/img<%= image_id %>.jpg" alt="ガチャを引いてください">
+        </p>
+        <form method="post" action="/gacha">
+          <p>
+            <input type="submit" value="ガチャを引く">
+          </p>
+        </form>
+        <hr>
+        
+      </div>
+  </body>
+</html>
